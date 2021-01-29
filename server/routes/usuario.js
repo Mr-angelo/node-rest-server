@@ -2,6 +2,7 @@
 const express = require('express');
 const Usuario = require('../models/usuario');
 const bcrypt = require('bcrypt');
+const _ = require('underscore');
 
 
 //inicilización de express
@@ -41,11 +42,25 @@ app.post('/usuario', function(req, res) {
     });
 });
 
-app.put('/usuario', function(req, res) {
+app.put('/usuario/:id', function(req, res) {
     let id = req.params.id;
-    res.json({
-        id
-    });
+    let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
+
+    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        res.json({
+            ok: true,
+            usuario: usuarioDB
+        });
+
+    })
 });
 
 app.delete('/usuario', function(req, res) {
